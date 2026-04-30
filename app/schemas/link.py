@@ -15,3 +15,4 @@ class CreateLinkRequest(BaseModel):
 class CreateLinkResponse(BaseModel):
     link_id: str
     tracking_url: str
+    tracking_pixel: str

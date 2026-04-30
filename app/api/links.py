@@ -23,6 +23,7 @@ async def create_link(
     return CreateLinkResponse(
         link_id=link.link_id,
         tracking_url=f"{settings.base_url}/t/{link.short_code}",
+        tracking_pixel=f"{settings.base_url}/pixel/{link.short_code}"
     )
 
 

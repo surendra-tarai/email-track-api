@@ -10,26 +10,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to VM via SSH
+      - name: Install Docker
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            export PATH=$PATH:/usr/local/bin:/usr/bin
-
             if ! command -v docker &> /dev/null; then
               curl -fsSL https://get.docker.com | sh
-              sudo usermod -aG docker $USER
-              newgrp docker
+              sudo usermod -aG docker ${{ vars.VM_USER }}
             fi
 
-            if [ ! -d "${{ vars.APP_DIR }}/.git" ]; then
+      - name: Clone or pull repo
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            if [ -d "${{ vars.APP_DIR }}/.git" ]; then
+              cd ${{ vars.APP_DIR }} && git pull origin main
+            else
+              rm -rf ${{ vars.APP_DIR }}
               git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git ${{ vars.APP_DIR }}
             fi
 
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
             cd ${{ vars.APP_DIR }}
-            git pull origin main
-            docker compose up --build -d
-            docker compose ps
+            sudo docker compose up --build -d
+
+      - name: Verify
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ${{ vars.APP_DIR }}
+            sudo docker compose ps

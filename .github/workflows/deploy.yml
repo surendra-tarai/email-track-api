@@ -13,8 +13,8 @@ jobs:
       - name: Deploy to VM via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             cd ${{ secrets.APP_DIR }}

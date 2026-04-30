@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      APP_DIR: /home/${{ vars.VM_USER }}/email-track-api
 
     steps:
       - name: Install Docker
@@ -29,7 +31,7 @@ jobs:
           username: ${{ vars.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            APP_DIR="${{ vars.APP_DIR }}"
+            APP_DIR="${{ env.APP_DIR }}"
 
             if [ -z "$APP_DIR" ]; then
               echo "ERROR: APP_DIR variable is not set"
@@ -52,7 +54,7 @@ jobs:
           username: ${{ vars.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            cd ${{ vars.APP_DIR }}
+            cd ${{ env.APP_DIR }}
             sudo docker compose up --build -d
 
       - name: Verify
@@ -62,5 +64,5 @@ jobs:
           username: ${{ vars.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            cd ${{ vars.APP_DIR }}
+            cd ${{ env.APP_DIR }}
             sudo docker compose ps

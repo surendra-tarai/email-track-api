@@ -17,8 +17,13 @@ jobs:
           username: ${{ vars.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            cd ${{ secrets.APP_DIR }}
+            export PATH=$PATH:/usr/local/bin:/usr/bin
+
+            if [ ! -d "${{ vars.APP_DIR }}/.git" ]; then
+              git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git ${{ vars.APP_DIR }}
+            fi
+
+            cd ${{ vars.APP_DIR }}
             git pull origin main
-            docker compose build --no-cache
-            docker compose up -d
+            docker compose up --build -d
             docker compose ps

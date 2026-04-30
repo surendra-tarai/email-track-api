@@ -29,11 +29,20 @@ jobs:
           username: ${{ vars.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            if [ -d "${{ vars.APP_DIR }}/.git" ]; then
-              cd ${{ vars.APP_DIR }} && git pull origin main
+            APP_DIR="${{ vars.APP_DIR }}"
+
+            if [ -z "$APP_DIR" ]; then
+              echo "ERROR: APP_DIR variable is not set"
+              exit 1
+            fi
+
+            if [ -d "$APP_DIR/.git" ]; then
+              cd "$APP_DIR"
+              git fetch origin main
+              git reset --hard origin/main
             else
-              rm -rf ${{ vars.APP_DIR }}
-              git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git ${{ vars.APP_DIR }}
+              rm -rf "$APP_DIR"
+              git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git "$APP_DIR"
             fi
 
       - name: Deploy

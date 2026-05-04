@@ -21,3 +21,11 @@ class ClickEventDocument(BaseModel):
     utm_source: Optional[str] = None
     utm_medium: Optional[str] = None
     utm_campaign: Optional[str] = None
+
+
+class EmailOpenDocument(BaseModel):
+    email_id: str
+    uid: Optional[str] = None
+    opened_at: datetime = Field(default_factory=lambda: datetime.now(tz=IST))
+    ip: str
+    user_agent: str

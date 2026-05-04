@@ -42,4 +42,9 @@ async def _create_indexes() -> None:
         IndexModel([("link_id", ASCENDING), ("ip", ASCENDING), ("user_agent", ASCENDING)]),
     ])
 
+    await db.email_opens.create_indexes([
+        IndexModel([("email_id", ASCENDING)]),
+        IndexModel([("opened_at", ASCENDING)]),
+    ])
+
     logger.info("MongoDB indexes ensured")

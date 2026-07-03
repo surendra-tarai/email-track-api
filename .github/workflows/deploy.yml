@@ -98,10 +98,15 @@ jobs:
             if ! command -v certbot &> /dev/null; then
               sudo apt-get install -y certbot python3-certbot-nginx
             fi
+            if ! getent ahostsv4 ${{ vars.DOMAIN }} >/dev/null 2>&1; then
+              echo "WARNING: Skipping SSL setup because DNS A record for ${{ vars.DOMAIN }} is not resolvable yet."
+              exit 0
+            fi
+
             sudo certbot --nginx -d ${{ vars.DOMAIN }} \
               --non-interactive --agree-tos \
               -m ${{ vars.CERT_EMAIL }} \
-              --keep-until-expiring
+              --keep-until-expiring || echo "WARNING: Certbot failed; continuing deployment without updating SSL certificates."
 
       - name: Deploy
         uses: appleboy/ssh-action@v1.2.0

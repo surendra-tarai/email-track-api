@@ -98,10 +98,19 @@ jobs:
             if ! command -v certbot &> /dev/null; then
               sudo apt-get install -y certbot python3-certbot-nginx
             fi
-            sudo certbot --nginx -d ${{ vars.DOMAIN }} \
+            if ! getent ahosts "${{ vars.DOMAIN }}" >/dev/null 2>&1; then
+              echo "::warning::Skipping SSL setup because DNS for ${{ vars.DOMAIN }} is not resolvable yet."
+              exit 0
+            fi
+
+            sudo certbot --nginx -d "${{ vars.DOMAIN }}" \
               --non-interactive --agree-tos \
               -m ${{ vars.CERT_EMAIL }} \
-              --keep-until-expiring
+              --keep-until-expiring || {
+                certbot_exit_code=$?
+                echo "::warning::Certbot failed with exit code ${certbot_exit_code}; check /var/log/letsencrypt/letsencrypt.log. Continuing deployment without updating SSL certificates."
+                exit 0
+              }
 
       - name: Deploy
         uses: appleboy/ssh-action@v1.2.0
